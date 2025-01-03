@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  # Service pour la base de données MySQL
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: your_db_name
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+  # Service pour le Backend Node.js
+  backend:
+    build:
+      context: ./backend # Chemin vers le dossier du Dockerfile du Backend
+    ports:
+      - "5000:5000" # Expose le port 5000 pour l'API Node.js
+    environment:
+      - MYSQL_HOST=db
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root
+      - MYSQL_DATABASE=your_db_name
+    depends_on:
+      - db # Assure que MySQL est démarré avant le backend
+
+  # Service pour le Frontend React
+  frontend:
+    build:
+      context: ./frontend # Chemin vers le dossier du Dockerfile du Frontend
+    ports:
+      - "80:80" # Expose le port 80 pour l'application frontend
+    depends_on:
+      - backend # Dépend du backend pour accéder aux APIs
+
+volumes:
+  db_data: # Volume persistant pour les données MySQL
